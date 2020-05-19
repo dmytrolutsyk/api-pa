@@ -1,0 +1,32 @@
+{
+  "name": "nodeJS",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "bcrypt": "^4.0.1",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.5.5",
+    "mongomem": "^0.1.9",
+    "multer": "^1.4.2",
+    "node": "^13.12.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmytrolutsyk/Projet-node-ESGI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dmytrolutsyk/Projet-node-ESGI/issues"
+  },
+  "homepage": "https://github.com/dmytrolutsyk/Projet-node-ESGI#readme"
+}

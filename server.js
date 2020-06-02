@@ -157,6 +157,23 @@ function isUsernameValid(str){
     
 });
 
+/*GET all annonces*/
+app.get('/annonces/all', async function(req, res) {
+    var token = req.get('x-access-token');
+                try {
+                    const col = db.collection('annonces');
+                    let results = await col.find().sort({ _id: -1}).toArray();
+                    res.send({
+                        error: null,
+                        annonces: results
+                    });
+                } catch (err) {
+                    res.send({
+                        error: err
+                    });
+                }            
+});
+
 /* PUT A annonce */
 app.put('/annonces', async function(req, res) {
     var token = req.get('x-access-token');

@@ -92,7 +92,7 @@ function isUsernameValid(str){
     let password = req.body != undefined? req.body.password : null;
     const col = db.collection('users');
   
-    if (password == null /*|| passwordOk == null*/) {
+    if (password == null) {
         return res.status(400).json({'error': 'Le mot de passe doit contenir au moins 4 caractères', 'token': undefined});
     } else if (!username) {
         return res.status(400).json({'error': 'Votre identifiant doit contenir entre 2 et 20 caractères', 'token': undefined});
@@ -174,6 +174,22 @@ app.get('/annonces/all', async function(req, res) {
                 }            
 });
 
+/*GET all users*/
+app.get('/users/all', async function(req, res) {
+                try {
+                    const col = db.collection('users');
+                    let results = await col.find().sort({ _id: -1}).toArray();
+                    res.send({
+                        error: null,
+                        annonces: results
+                    });
+                } catch (err) {
+                    res.send({
+                        error: err
+                    });
+                }            
+});
+
 /* PUT A annonce */
 app.put('/annonces', async function(req, res) {
     var token = req.get('x-access-token');
@@ -187,14 +203,11 @@ app.put('/annonces', async function(req, res) {
                 let title = req.body.title;
                 let description = req.body.description;
                 let category = req.body.category;
-                let mail = req.body.mail;
                 let createdAt = dateNow();
-                let phoneNumber = req.body.phoneNumber;
                 let photos = req.body != undefined? req.body.photos : null;
-                let city = req.body.city;
                 let lastUpdatedAt = null;
                 
-                if(title.length === 0 || description.length === 0 || category.length === 0 || mail.length === 0 || phoneNumber.length === 0 || city.length === 0){
+                if(title.length === 0 || description.length === 0 || category.length === 0){
                     res.status(400).send({error: 'Aucun contenu n\'a été saisi'});
                 } else {
                     let resInsert = await col.insertOne({
@@ -202,9 +215,6 @@ app.put('/annonces', async function(req, res) {
                         title,
                         description,
                         category,
-                        mail,
-                        phoneNumber,
-                        city,
                         photos,
                         createdAt,
                         lastUpdatedAt
@@ -231,12 +241,9 @@ app.patch('/annonces/:id', async function(req, res) {
             let title = req.body.title;
             let description = req.body.description;
             let category = req.body.category;
-            let mail = req.body.mail;
-            let phoneNumber = req.body.phoneNumber;
             let photos = req.file != undefined? req.file.photos : null;
-            let city = req.body.city;
             let lastUpdatedAt = dateNow();
-            if(title.length === 0 || description.length === 0 || category.length === 0 || mail.length === 0 || phoneNumber.length === 0 || city.length === 0){
+            if(title.length === 0 || description.length === 0 || category.length === 0){
                 res.status(400).send({error: 'Aucun contenu n\'a été saisi'});
             } else {
                 const annonce = await col.findOne({_id: ObjectId(req.params.id)});
@@ -256,10 +263,7 @@ app.patch('/annonces/:id', async function(req, res) {
                                 title: req.body.title,
                                 description: req.body.description,
                                 category: req.body.category,
-                                mail: req.body.mail,
-                                phoneNumber: req.body.phoneNumber,
                                 photos: upload.single(photos),
-                                city: req.body.city
                             }
                      }
                     );
@@ -370,16 +374,12 @@ app.patch('/users/:id', async function(req, res) {
             const col = db.collection('users');
             var username = req.body.username;
             var password = req.body.password;
-            var nom = req.body.nom;
-            var prenom = req.body.prenom;
-            var adresse = req.body.adresse;
             var ville = req.body.ville;
-            var code_postal = req.body.code_postal;
-            var birthdate = req.body.birthdate;
             var email = req.body.email;
             var status_user = req.body.status_user;
+            var phone = req.body.phone;
             let lastUpdatedAt = dateNow();
-            if(username.length === 0 && password.length === 0 && nom.length === 0 && prenom.length === 0 && adresse.length === 0 && ville.length === 0 && code_postal.length === 0 && birthdate.length === 0 && email.length === 0 && status_user.length === 0){
+            if(username.length === 0 && password.length === 0 && ville.length === 0 && email.length === 0 && status_user.length === 0 && phone.length === 0){
                 res.status(400).send({error: 'Aucun contenu n\'a été saisi'});
             } else {
                 // const annonce = await col.findOne({_id: ObjectId(req.params.id)});
@@ -399,13 +399,9 @@ app.patch('/users/:id', async function(req, res) {
                         {_id: ObjectId(req.params.id)},
                         {$set: {username: req.body.username,
                             password: req.body.password,
-                            nom: req.body.nom,
-                            prenom: req.body.prenom,
-                            adresse: req.body.adresse,
                             ville: req.body.ville,
-                            code_postal: req.body.code_postal,
-                            birthdate: req.body.birthdate,
                             status_user: req.body.status_user,
+                            phone: req.body.phone,
                             lastUpdatedAt: lastUpdatedAt}}
                     );
                     const newuser = await col.findOne({_id: ObjectId(req.params.id)});
@@ -429,13 +425,13 @@ app.patch('/users/:id', async function(req, res) {
                 try {
                     let userID =  data.userId;
                     let user = await db.collection('users').findOne({ _id: ObjectId(userID) });
-                    //console.log(user);
+                    console.log(user);
                     res.send({
                         error: null,
                         user: user
                     });
                 } catch (err) {
-                   // console.log(err);
+                    console.log(err);
                     res.send({
                         error: err
                     });

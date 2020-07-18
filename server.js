@@ -203,18 +203,20 @@ app.put('/annonces', async function(req, res) {
                 let title = req.body.title;
                 let description = req.body.description;
                 let category = req.body.category;
+                let type = req.body.type;
                 let createdAt = dateNow();
                 let photos = req.body != undefined? req.body.photos : null;
                 let lastUpdatedAt = null;
                 
-                if(title.length === 0 || description.length === 0 || category.length === 0){
-                    res.status(400).send({error: 'Aucun contenu n\'a été saisi'});
+                if(title.length === 0 || description.length === 0 || category.length === 0 || type.length === 0){
+                    res.status(400).send({error: 'Tout les champs n\'ont pas été saisi'});
                 } else {
                     let resInsert = await col.insertOne({
                         userID,
                         title,
                         description,
                         category,
+                        type,
                         photos,
                         createdAt,
                         lastUpdatedAt
@@ -241,9 +243,10 @@ app.patch('/annonces/:id', async function(req, res) {
             let title = req.body.title;
             let description = req.body.description;
             let category = req.body.category;
+            let type = req.body.type;
             let photos = req.file != undefined? req.file.photos : null;
             let lastUpdatedAt = dateNow();
-            if(title.length === 0 || description.length === 0 || category.length === 0){
+            if(title.length === 0 || description.length === 0 || category.length === 0 || type.length === 0){
                 res.status(400).send({error: 'Aucun contenu n\'a été saisi'});
             } else {
                 const annonce = await col.findOne({_id: ObjectId(req.params.id)});
@@ -263,6 +266,7 @@ app.patch('/annonces/:id', async function(req, res) {
                                 title: req.body.title,
                                 description: req.body.description,
                                 category: req.body.category,
+                                type: req.body.type,
                                 photos: upload.single(photos),
                             }
                      }

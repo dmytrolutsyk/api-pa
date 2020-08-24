@@ -419,7 +419,7 @@ app.patch('/users/:id', async function(req, res) {
     });
 });
 
- /* GET user profil */
+ /* GET Category */
  app.get('/category', async function(req, res) {
     var token = req.get('x-access-token');
     jwt.verify(token, JWT_SIGN_SECRET, async (err, data) => {

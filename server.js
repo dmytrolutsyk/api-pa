@@ -13,6 +13,7 @@ const url = process.env.MONGODB_URI || 'mongodb://localhost:' + 27017 + '/annonc
 const dbName = "annonces";
 const JWT_SIGN_SECRET ='secret';
 const multer = require('multer');
+const { Server } = require('http');
 var upload = multer({ dest: 'uploads/' })
 
 //IMPORTS DE TEST POUR IMAGE
@@ -21,6 +22,17 @@ var upload = multer({ dest: 'uploads/' })
 // let multiparty = require('multiparty');
 // var im = require('imagemagick');
 // let mime = require('mime-types');
+
+async function authentication(req, res, next){
+    let response =  await app.post('/signin',req.app.post('/signin', async function(req, res){}));
+    if (response.error){
+        res.status(response.statusCode).send(response);
+        return;
+    }
+    res.user = response.messsage;
+    console.log("middleware used")
+    await next();
+}
 
 function generateTokenForUser(userData) {
     return jwt.sign({
@@ -86,6 +98,52 @@ function isUsernameValid(str){
     res.send('Hello World!');
   });
 
+  app.post('/signin', async function(req, res){
+    //Params
+    var username = req.body.username;
+    var password = req.body.password;
+    var user = null;
+    console.log("in signin")
+  
+    const col = db.collection('users');
+
+    if (password == null){
+        return res.status(400).json({'error': 'Le mot de passe doit contenir au moins 4 caractères', 'token': undefined});
+    } else if(!username){
+        return res.status(400).json({'error': 'Votre identifiant doit contenir entre 2 et 20 caractères', 'token': undefined});
+    }else if(password.length <= 3) {
+        return res.status(400).json({'error': 'Le mot de passe doit contenir au moins 4 caractères'});
+    }else if(username.length <= 2 || username.length >= 21 ) {
+        return res.status(400).json({'error': 'Votre identifiant doit contenir entre 2 et 20 caractères'});
+    }else if(!isUsernameValid(username)) {
+        return res.status(400).json({'error': 'Votre identifiant ne doit contenir que des lettres minuscules non accentuées',
+        'token': undefined});
+    }
+
+    let data = await col.find({}).toArray();
+    if (data.some(data => data.username === req.body.username)) {
+        
+        data.forEach(element => {
+            if(element.username === req.body.username){              
+               user = element
+            }
+        });
+        bcrypt.compare(password, user.password, function(errBycrypt, resBycrypt) {
+            if (resBycrypt) {
+                return res.status(200).json({
+                    'error': null,
+                    'UserId': user._id,
+                    'token': generateTokenForUser(user)
+                });
+            } else {
+                return res.status(403).json({ "error": "Cet identifiant est inconnu"});
+            }
+        });
+    }else {
+            return res.status(403).json({ 'error': 'Cet identifiant est inconnu' });
+        }
+});
+
   app.post('/signup', async function(req, res){
     // Params
     let username = req.body != undefined? req.body.username : null;
@@ -131,6 +189,8 @@ function isUsernameValid(str){
 
     }
 });
+
+ app.use(authentication);
 
   /* GET annonceS */
   app.get('/annonces', async function(req, res) {
@@ -321,51 +381,6 @@ app.delete('/annonces/:id', async function(req, res) {
             }
         }
     });
-});
-
-app.post('/signin', async function(req, res){
-    //Params
-    var username = req.body.username;
-    var password = req.body.password;
-    var user = null;
-  
-    const col = db.collection('users');
-
-    if (password == null){
-        return res.status(400).json({'error': 'Le mot de passe doit contenir au moins 4 caractères', 'token': undefined});
-    } else if(!username){
-        return res.status(400).json({'error': 'Votre identifiant doit contenir entre 2 et 20 caractères', 'token': undefined});
-    }else if(password.length <= 3) {
-        return res.status(400).json({'error': 'Le mot de passe doit contenir au moins 4 caractères'});
-    }else if(username.length <= 2 || username.length >= 21 ) {
-        return res.status(400).json({'error': 'Votre identifiant doit contenir entre 2 et 20 caractères'});
-    }else if(!isUsernameValid(username)) {
-        return res.status(400).json({'error': 'Votre identifiant ne doit contenir que des lettres minuscules non accentuées',
-        'token': undefined});
-    }
-
-    let data = await col.find({}).toArray();
-    if (data.some(data => data.username === req.body.username)) {
-        
-        data.forEach(element => {
-            if(element.username === req.body.username){              
-               user = element
-            }
-        });
-        bcrypt.compare(password, user.password, function(errBycrypt, resBycrypt) {
-            if (resBycrypt) {
-                return res.status(200).json({
-                    'error': null,
-                    'UserId': user._id,
-                    'token': generateTokenForUser(user)
-                });
-            } else {
-                return res.status(403).json({ "error": "Cet identifiant est inconnu"});
-            }
-        });
-    }else {
-            return res.status(403).json({ 'error': 'Cet identifiant est inconnu' });
-        }
 });
 
 app.patch('/users/:id', async function(req, res) {

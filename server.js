@@ -267,12 +267,14 @@ app.put('/annonces', async function(req, res) {
                 let createdAt = dateNow();
                 let photos = req.body != undefined? req.body.photos : null;
                 let lastUpdatedAt = null;
+                let username = req.body != undefined? req.body.username : null;
                 
                 if(title.length === 0 || description.length === 0 || category.length === 0 || type.length === 0){
                     res.status(400).send({error: 'Tout les champs n\'ont pas été saisi'});
                 } else {
                     let resInsert = await col.insertOne({
                         userID,
+                        username,
                         title,
                         description,
                         category,

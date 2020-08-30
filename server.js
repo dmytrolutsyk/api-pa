@@ -55,7 +55,7 @@ function dateNow(){
     var minutes = dateNow.getMinutes();
     var seconds = dateNow.getSeconds();
     month += 1;
-    const dateFormatted = formatDigits(day) + '/' + formatDigits(month) + '/' + year + ' ' + formatDigits(hour) + ':' + formatDigits(minutes) + ':' + formatDigits(seconds);
+    const dateFormatted = formatDigits(day) + '/' + formatDigits(month) + '/' + year + ' ' + formatDigits(hour+2) + ':' + formatDigits(minutes) + ':' + formatDigits(seconds);
     return dateFormatted;
 }
 
